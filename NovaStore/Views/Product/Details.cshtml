@@ -1,0 +1,110 @@
+﻿@model NovaStore.ViewModels.Shop.ProductDetailViewModel
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="product-page">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a asp-controller="Home" asp-action="Index">Home</a>
+        <span class="sep">/</span>
+        <a asp-controller="Shop" asp-action="Index">@Model.CategoryName</a>
+        <span class="sep">/</span>
+        <span>@Model.Name</span>
+    </div>
+
+    <div class="product-detail">
+
+        <!-- Gallery -->
+        <div class="product-gallery">
+            <div class="gallery-thumbs">
+                @foreach (var img in Model.ImageFileNames)
+                {
+                    <div class="gallery-thumb @(img == Model.ImageFileNames.First() ? "active" : "")">
+                        <img src="~/images/products/@img" alt="@Model.Name">
+                    </div>
+                }
+            </div>
+            <div class="gallery-main" id="mainImg">
+                <img src="~/images/products/@Model.ImageFileNames.FirstOrDefault()" alt="@Model.Name" id="mainImgEl">
+            </div>
+        </div>
+
+        <!-- Info -->
+        <div class="product-right">
+            @if (Model.CollectionName != null)
+            {
+                <p class="section-label">@Model.CollectionName</p>
+            }
+            <h1 class="pd-name">@Model.Name</h1>
+
+            @if (Model.Reviews.Any())
+            {
+                <div class="pd-rating">
+                    <div class="stars">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="fa fa-star@(i > Model.AverageRating ? "-o" : "")"></i>
+                        }
+                    </div>
+                    <span class="review-count">@Model.AverageRating.ToString("0.0") · @Model.Reviews.Count reviews</span>
+                </div>
+            }
+
+            <div class="pd-price">
+                @if (Model.IsOnSale)
+                {
+                    <span class="price price-sale">$@Model.Price</span>
+                    <span class="price-old">$@Model.OldPrice</span>
+                }
+                else
+                {
+                    <span class="price">$@Model.Price</span>
+                }
+            </div>
+
+            <p style="font-size:13px;color:var(--gray-600);line-height:1.9;max-width:420px">
+                @Model.Description
+            </p>
+
+            <div class="pd-divider"></div>
+
+            <!-- Size -->
+            <div class="option-label">Size — <span style="font-weight:400;color:var(--gray-600)">Select</span></div>
+            <div class="size-options">
+                @foreach (var variant in Model.Variants)
+                {
+                    <button class="size-btn @(!variant.IsAvailable ? "unavailable" : "")"
+                            data-variant-id="@variant.Id"
+                            disabled="@(!variant.IsAvailable)">
+                        @variant.Size
+                    </button>
+                }
+            </div>
+
+            <div class="pd-divider"></div>
+
+            <!-- Add to Cart -->
+            <div class="qty-add">
+                <div class="qty-control">
+                    <button class="qty-btn" onclick="changeQty(-1)">−</button>
+                    <input type="number" class="qty-input" value="1" min="1" id="qtyInput">
+                    <button class="qty-btn" onclick="changeQty(1)">+</button>
+                </div>
+                <button class="btn-add-cart" onclick="addToCart(@Model.Id)">Add to Bag</button>
+                <button class="btn-wishlist"><i class="fa fa-heart"></i></button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function addToCart(productId) {
+            alert('Cart functionality coming in the next step!');
+        }
+    </script>
+}

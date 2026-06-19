@@ -1,0 +1,6 @@
+﻿namespace NovaStore.ViewModels.Checkout
+{
+    public class OrderConfirmationViewModel
+    {
+    }
+}

@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - NOVA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-links">
+                <a asp-controller="Home" asp-action="Index" class="active">Home</a>
+                <a asp-controller="Shop" asp-action="Index">Shop</a>
+                <a asp-controller="Collections" asp-action="Index">Collections</a>
+            </div>
+            <a asp-controller="Home" asp-action="Index" class="logo">NOVA</a>
+            <div class="nav-icons">
+                <i class="fa fa-search"></i>
+                <i class="fa fa-user"></i>
+                <a asp-controller="Cart" asp-action="Index" class="cart-icon" style="color:inherit">
+                    <i class="fa fa-bag-shopping"></i>
+                    <span class="cart-count">2</span>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+
+
+
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <span class="logo-footer">NOVA</span>
+                <p>A luxury fashion house rooted in the ancient beauty of Egypt — crafting timeless pieces for the modern soul.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-pinterest"></i></a>
+                    <a href="#"><i class="fab fa-tiktok"></i></a>
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Shop</h4>
+                <ul>
+                    <li><a href="shop.html">New Arrivals</a></li>
+                    <li><a href="shop.html">Women</a></li>
+                    <li><a href="shop.html">Men</a></li>
+                    <li><a href="shop.html">Accessories</a></li>
+                    <li><a href="shop.html">Sale</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Help</h4>
+                <ul>
+                    <li><a href="contact.html">Contact Us</a></li>
+                    <li><a href="#">Shipping & Returns</a></li>
+                    <li><a href="#">Size Guide</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Track Order</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>About</h4>
+                <ul>
+                    <li><a href="#">Our Story</a></li>
+                    <li><a href="#">Sustainability</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Press</a></li>
+                    <li><a href="#">Stockists</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 NOVA Fashion. All rights reserved.</p>
+            <p>Privacy Policy · Terms of Service · Cookie Settings</p>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
