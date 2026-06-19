@@ -1,5 +1,103 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model NovaStore.ViewModels.Checkout.CheckoutViewModel
+
 @{
+    ViewData["Title"] = "Checkout";
 }
+
+<div class="contact-page">
+    <div class="contact-grid">
+
+        <div class="contact-form" style="flex:1">
+            <h3>Shipping Details</h3>
+
+            <form asp-controller="Checkout" asp-action="PlaceOrder" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input asp-for="FullName" />
+                        <span asp-validation-for="FullName" style="color:#c0392b;font-size:12px"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input asp-for="Email" type="email" />
+                    <span asp-validation-for="Email" style="color:#c0392b;font-size:12px"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone *</label>
+                    <input asp-for="Phone" />
+                    <span asp-validation-for="Phone" style="color:#c0392b;font-size:12px"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>Address *</label>
+                    <input asp-for="Address" />
+                    <span asp-validation-for="Address" style="color:#c0392b;font-size:12px"></span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>City *</label>
+                        <input asp-for="City" />
+                        <span asp-validation-for="City" style="color:#c0392b;font-size:12px"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Country *</label>
+                        <input asp-for="Country" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Order Notes (optional)</label>
+                    <textarea asp-for="Notes"></textarea>
+                </div>
+
+                <div class="pd-divider"></div>
+
+                <div class="option-label" style="margin-bottom:16px">Payment Method</div>
+                <div style="display:flex;gap:16px;margin-bottom:24px">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                        <input type="radio" asp-for="PaymentMethod" value="COD" checked />
+                        Cash on Delivery
+                    </label>
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                        <input type="radio" asp-for="PaymentMethod" value="Card" />
+                        Pay Online (Card / Wallet)
+                    </label>
+                </div>
+
+                <button type="submit" class="form-submit">Place Order &nbsp;<i class="fa fa-arrow-right"></i></button>
+            </form>
+        </div>
+
+        <aside style="width:380px">
+            <div class="order-summary">
+                <h3>Order Summary</h3>
+                @foreach (var item in Model.Cart!.Items)
+                {
+                    <div class="summary-row">
+                        <span>@item.ProductName (@item.VariantLabel) x@item.Quantity</span>
+                        <span>$@item.LineTotal.ToString("0.00")</span>
+                    </div>
+                }
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>$@Model.Cart.Subtotal.ToString("0.00")</span>
+                </div>
+                <div class="summary-row">
+                    <span>Tax</span>
+                    <span>$@Model.Cart.Tax.ToString("0.00")</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span>$@Model.Cart.Total.ToString("0.00")</span>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+</div>

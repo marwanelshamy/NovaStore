@@ -14,10 +14,10 @@ document.querySelectorAll('.gallery-thumb').forEach((thumb) => {
     });
 });
 
-// Size buttons (product page)
-document.querySelectorAll('.size-btn:not(.unavailable)').forEach(btn => {
+document.querySelectorAll('.size-btn[data-variant-id]').forEach(btn => {
     btn.addEventListener('click', () => {
-        btn.closest('.size-options')?.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+        if (btn.classList.contains('unavailable')) return;
+        document.querySelectorAll('.size-btn[data-variant-id]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
     });
 });

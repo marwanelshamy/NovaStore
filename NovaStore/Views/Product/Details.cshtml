@@ -102,9 +102,34 @@
 </div>
 
 @section Scripts {
+    @Html.AntiForgeryToken()
     <script>
         function addToCart(productId) {
-            alert('Cart functionality coming in the next step!');
+            const selectedBtn = document.querySelector('.size-btn.active') || document.querySelector('.size-btn:not(.unavailable)');
+            if (!selectedBtn) {
+                alert('Please select a size.');
+                return;
+            }
+            const variantId = selectedBtn.dataset.variantId;
+            const qty = parseInt(document.getElementById('qtyInput').value) || 1;
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch('/Cart/AddToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token
+                },
+                body: `variantId=${variantId}&quantity=${qty}&__RequestVerificationToken=${encodeURIComponent(token)}`
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelectorAll('.cart-count').forEach(el => el.textContent = data.itemCount);
+                        alert('Added to bag!');
+                    }
+                });
         }
     </script>
+}
 }
