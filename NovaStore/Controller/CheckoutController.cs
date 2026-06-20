@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using NovaStore.Models;
 using NovaStore.Services.Implementations;
 using NovaStore.Services.Interfaces;
@@ -11,15 +13,18 @@ namespace NovaStore.Controllers
     {
         private readonly ICartService _cartService;
         private readonly IOrderService _orderService;
+        private readonly IPaymentService _paymentService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public CheckoutController(
             ICartService cartService,
             IOrderService orderService,
+            IPaymentService paymentService,
             UserManager<ApplicationUser> userManager)
         {
             _cartService = cartService;
             _orderService = orderService;
+            _paymentService = paymentService;
             _userManager = userManager;
         }
 
@@ -59,27 +64,25 @@ namespace NovaStore.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> PlaceOrder(CheckoutViewModel model)
+        [AllowAnonymous]
+        public async Task<IActionResult> PaymentCallback([FromBody] Newtonsoft.Json.Linq.JObject payload, [FromQuery] string hmac)
         {
-            var (userId, sessionId) = await GetIdentity();
-            var cart = await _cartService.GetCartAsync(userId, sessionId);
+            var rawPayload = payload.ToString(Newtonsoft.Json.Formatting.None);
 
-            if (!cart.Items.Any())
-                return RedirectToAction("Index", "Cart");
-
-            if (!ModelState.IsValid)
+            if (!_paymentService.VerifyHmac(rawPayload, hmac))
             {
-                model.Cart = cart;
-                return View("Index", model);
+                return BadRequest("Invalid HMAC signature.");
             }
 
-            var order = await _orderService.CreateOrderAsync(model, userId, sessionId);
+            var success = payload["obj"]?["success"]?.Value<bool>() ?? false;
+            var merchantOrderId = payload["obj"]?["order"]?["merchant_order_id"]?.ToString();
 
-            // Online payment will be wired in the next step (Paymob)
-            // For now, COD is the only fully working path
+            if (success && int.TryParse(merchantOrderId, out var orderId))
+            {
+                await _orderService.ConfirmOrderAsync(orderId);
+            }
 
-            return RedirectToAction("Confirmation", new { orderNumber = order.OrderNumber });
+            return Ok();
         }
 
         public async Task<IActionResult> Confirmation(string orderNumber)

@@ -1,5 +1,40 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model NovaStore.ViewModels.Account.LoginViewModel
+
 @{
+    ViewData["Title"] = "Login";
 }
+
+<div style="max-width:420px;margin:80px auto;padding:0 20px">
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:36px;text-align:center;margin-bottom:8px">Welcome Back</h1>
+    <p style="text-align:center;color:var(--gray-600);margin-bottom:32px">Sign in to your NOVA account</p>
+
+    <div asp-validation-summary="ModelOnly" style="color:#c0392b;font-size:13px;margin-bottom:16px"></div>
+
+    <form asp-controller="Account" asp-action="Login" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ReturnUrl" />
+
+        <div class="form-group">
+            <label>Email</label>
+            <input asp-for="Email" type="email" />
+            <span asp-validation-for="Email" style="color:#c0392b;font-size:12px"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input asp-for="Password" type="password" />
+            <span asp-validation-for="Password" style="color:#c0392b;font-size:12px"></span>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:24px">
+            <input asp-for="RememberMe" type="checkbox" style="width:auto" />
+            <label style="margin:0;cursor:pointer">Remember me</label>
+        </div>
+
+        <button type="submit" class="form-submit" style="width:100%">Sign In</button>
+
+        <p style="text-align:center;margin-top:24px;font-size:13px;color:var(--gray-600)">
+            Don't have an account? <a asp-controller="Account" asp-action="Register" style="color:var(--camel)">Create one</a>
+        </p>
+    </form>
+</div>

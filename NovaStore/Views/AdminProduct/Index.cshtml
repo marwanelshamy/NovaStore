@@ -1,0 +1,46 @@
+﻿@model List<NovaStore.Models.Product>
+
+@{
+    ViewData["Title"] = "Products";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-topbar">
+    <h1>Products</h1>
+    <a asp-action="Create" class="btn-admin">+ Add Product</a>
+</div>
+
+<div class="admin-card">
+    <table class="admin-table">
+        <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+        @foreach (var p in Model)
+        {
+            <tr>
+                <td>
+                    @if (p.Images.Any())
+                    {
+                        <img src="~/images/products/@p.Images.First().FileName" style="width:48px;height:48px;object-fit:cover;border-radius:4px" />
+                    }
+                </td>
+                <td>@p.Name</td>
+                <td>@p.Category.Name</td>
+                <td>$@p.Price</td>
+                <td>@(p.IsActive ? "Active" : "Inactive")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@p.Id" class="btn-admin btn-admin-outline">Edit</a>
+                    <form asp-action="Delete" asp-route-id="@p.Id" method="post" style="display:inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-admin btn-admin-danger" onclick="return confirm('Deactivate this product?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+</div>

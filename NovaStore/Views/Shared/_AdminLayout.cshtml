@@ -1,5 +1,179 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - NOVA Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: 'Montserrat', sans-serif;
+            }
+
+            body {
+                background: #f5f5f3;
+                display: flex;
+                min-height: 100vh;
+            }
+
+            .admin-sidebar {
+                width: 240px;
+                background: #1a1a1a;
+                color: white;
+                padding: 24px 0;
+                flex-shrink: 0;
+            }
+
+                .admin-sidebar h2 {
+                    padding: 0 24px 24px;
+                    font-size: 20px;
+                    letter-spacing: 3px;
+                }
+
+            .admin-nav a {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 14px 24px;
+                color: #ccc;
+                text-decoration: none;
+                font-size: 13px;
+            }
+
+            .filter-btn {
+    padding: 6px 14px; font-size: 13px; border: 1px solid #ddd; background: white;
+    color: #555; text-decoration: none; border-radius: 4px; display: inline-block;
 }
+.filter-btn.filter-active { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+                .admin-nav a:hover, .admin-nav a.active {
+                    background: #2a2a2a;
+                    color: white;
+                }
+
+            .admin-main {
+                flex: 1;
+                padding: 32px 40px;
+            }
+
+            .admin-topbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 32px;
+            }
+
+                .admin-topbar h1 {
+                    font-size: 24px;
+                    font-weight: 600;
+                }
+
+            table.admin-table {
+                width: 100%;
+                border-collapse: collapse;
+                background: white;
+            }
+
+                table.admin-table th, table.admin-table td {
+                    padding: 12px 16px;
+                    text-align: left;
+                    border-bottom: 1px solid #eee;
+                    font-size: 13px;
+                }
+
+                table.admin-table th {
+                    background: #fafafa;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    font-size: 11px;
+                    letter-spacing: 1px;
+                }
+
+            .admin-card {
+                background: white;
+                padding: 24px;
+                border-radius: 4px;
+            }
+
+            .stat-card {
+                background: white;
+                padding: 20px;
+                border-radius: 4px;
+            }
+
+                .stat-card strong {
+                    display: block;
+                    font-size: 28px;
+                    margin-bottom: 4px;
+                }
+
+                .stat-card span {
+                    font-size: 12px;
+                    color: #888;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }
+
+            .btn-admin {
+                display: inline-block;
+                padding: 8px 16px;
+                background: #1a1a1a;
+                color: white;
+                text-decoration: none;
+                font-size: 12px;
+                border: none;
+                cursor: pointer;
+                border-radius: 2px;
+            }
+
+            .btn-admin-outline {
+                background: transparent;
+                color: #1a1a1a;
+                border: 1px solid #ddd;
+            }
+
+            .btn-admin-danger {
+                background: #c0392b;
+            }
+
+            input, select, textarea {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #ddd;
+                margin-bottom: 16px;
+                font-family: 'Montserrat', sans-serif;
+                font-size: 13px;
+                border-radius: 2px;
+            }
+
+            label {
+                display: block;
+                font-size: 12px;
+                font-weight: 600;
+                margin-bottom: 6px;
+            }
+    </style>
+</head>
+<body>
+
+    <aside class="admin-sidebar">
+        <h2>NOVA Admin</h2>
+        <nav class="admin-nav">
+            <a asp-controller="AdminDashboard" asp-action="Index"><i class="fa fa-gauge"></i> Dashboard</a>
+            <a asp-controller="AdminProduct" asp-action="Index"><i class="fa fa-shirt"></i> Products</a>
+            <a asp-controller="AdminOrder" asp-action="Index"><i class="fa fa-box"></i> Orders</a>
+            <a asp-controller="Home" asp-action="Index"><i class="fa fa-arrow-left"></i> Back to Store</a>
+        </nav>
+    </aside>
+
+    <main class="admin-main">
+        @RenderBody()
+    </main>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

@@ -1,0 +1,85 @@
+﻿@model NovaStore.ViewModels.Admin.AdminProductFormViewModel
+
+@{
+    ViewData["Title"] = "Add Product";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-topbar">
+    <h1>Add Product</h1>
+</div>
+
+<div class="admin-card">
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+
+        <label>Name</label>
+        <input asp-for="Name" />
+
+        <label>Slug (URL-friendly, e.g. sand-dune-maxi-dress)</label>
+        <input asp-for="Slug" />
+
+        <label>Description</label>
+        <textarea asp-for="Description" rows="4"></textarea>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>
+                <label>Price</label>
+                <input asp-for="Price" type="number" step="0.01" />
+            </div>
+            <div>
+                <label>Old Price (optional, for sale items)</label>
+                <input asp-for="OldPrice" type="number" step="0.01" />
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>
+                <label>Category</label>
+                <select asp-for="CategoryId">
+                    @foreach (var c in Model.CategoryOptions)
+                    {
+                        <option value="@c.Id">@c.Name</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label>Collection (optional)</label>
+                <select asp-for="CollectionId">
+                    <option value="">-- None --</option>
+                    @foreach (var c in Model.CollectionOptions)
+                    {
+                        <option value="@c.Id">@c.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div style="display:flex;gap:20px;margin-bottom:16px">
+            <label style="display:flex;align-items:center;gap:8px;margin:0">
+                <input asp-for="IsFeatured" type="checkbox" style="width:auto;margin:0" /> Featured
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;margin:0">
+                <input asp-for="IsActive" type="checkbox" style="width:auto;margin:0" /> Active
+            </label>
+        </div>
+
+        <label>Product Images</label>
+        <input type="file" name="NewImages" multiple accept=".jpg,.jpeg,.png,.webp" />
+
+        <h3 style="margin:24px 0 12px;font-size:15px">Variants (Size / Color / Stock)</h3>
+        <div id="variantsContainer">
+            @for (int i = 0; i < 3; i++)
+            {
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+                    <input name="Variants[@i].Size" placeholder="Size (e.g. M)" />
+                    <input name="Variants[@i].Color" placeholder="Color (e.g. Sand)" />
+                    <input name="Variants[@i].SKU" placeholder="SKU" />
+                    <input name="Variants[@i].StockQuantity" type="number" placeholder="Stock" />
+                </div>
+            }
+        </div>
+
+        <button type="submit" class="btn-admin" style="margin-top:16px">Save Product</button>
+    </form>
+</div>

@@ -19,7 +19,21 @@
             <a asp-controller="Home" asp-action="Index" class="logo">NOVA</a>
             <div class="nav-icons">
                 <i class="fa fa-search"></i>
-                <i class="fa fa-user"></i>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" style="background:none;border:none;cursor:pointer;color:inherit;font-size:inherit" title="Logout">
+                            <i class="fa fa-user-check"></i>
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" style="color:inherit">
+                        <i class="fa fa-user"></i>
+                    </a>
+                }
                 <a asp-controller="Cart" asp-action="Index" class="cart-icon" style="color:inherit">
                     <i class="fa fa-bag-shopping"></i>
                     <span class="cart-count">2</span>

@@ -1,0 +1,140 @@
+﻿@using NovaStore.Models.Enums
+@model NovaStore.ViewModels.Admin.AdminOrderDetailViewModel
+
+@{
+    ViewData["Title"] = "Order Details";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-topbar">
+    <h1>Order #@Model.Order.OrderNumber</h1>
+</div>
+
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:24px">
+
+    <div class="admin-card">
+        <h3 style="margin-bottom:16px">Items</h3>
+        <table class="admin-table">
+            <tr><th>Product</th><th>Variant</th><th>Qty</th><th>Total</th></tr>
+            @foreach (var item in Model.Order.Items)
+            {
+                <tr>
+                    <td>@item.ProductName</td>
+                    <td>@item.VariantLabel</td>
+                    <td>@item.Quantity</td>
+                    <td>$@item.LineTotal.ToString("0.00")</td>
+                </tr>
+            }
+        </table>
+
+        <h3 style="margin:24px 0 16px">Shipping</h3>
+        <p>@Model.Order.ShippingName</p>
+        <p>@Model.Order.ShippingPhone — @Model.Order.ShippingEmail</p>
+        <p>@Model.Order.ShippingAddress, @Model.Order.ShippingCity, @Model.Order.ShippingCountry</p>
+        @if (!string.IsNullOrEmpty(Model.Order.Notes))
+        {
+            <p style="margin-top:8px"><strong>Notes:</strong> @Model.Order.Notes</p>
+        }
+
+        <h3 style="margin:24px 0 16px">Status History</h3>
+        <table class="admin-table">
+            <tr><th>Status</th><th>Date</th><th>Note</th></tr>
+            @foreach (var h in Model.Order.StatusHistory)
+            {
+                <tr>
+                    <td>@h.Status</td>
+                    <td>@h.ChangedAt.ToString("MMM d, yyyy h:mm tt")</td>
+                    <td>@h.Note</td>
+                </tr>
+            }
+        </table>
+    </div>
+
+    <div class="admin-card">
+        <h3 style="margin-bottom:16px">Order Status</h3>
+
+        <div style="display:flex;align-items:flex-start;margin-bottom:24px" id="statusStepper">
+            @{
+                var stages = new[] { OrderStatus.Pending, OrderStatus.Confirmed, OrderStatus.Packed, OrderStatus.Shipped, OrderStatus.Delivered };
+                var currentIdx = Array.IndexOf(stages, Model.Order.Status);
+            }
+            @for (int i = 0; i < stages.Length; i++)
+            {
+                var isDone = i < currentIdx;
+                var isCurrent = i == currentIdx;
+                <div class="step-item" data-index="@i" data-status="@stages[i]" style="flex:1;text-align:center;cursor:pointer">
+                    <div class="step-circle" style="width:28px;height:28px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:12px;
+                        background:@(isDone ? "var(--color-background-success)" : isCurrent ? "#1a1a1a" : "#f0f0f0");
+                        color:@(isDone ? "var(--color-text-success)" : isCurrent ? "white" : "#999");
+                        border:@(isDone ? "0.5px solid var(--color-border-success)" : "none")">
+                        @(isDone ? "✓" : (i + 1).ToString())
+                    </div>
+                    <p style="font-size:11px;margin:0;color:@(isCurrent || isDone ? "#1a1a1a" : "#999");font-weight:@(isCurrent ? "600" : "400")">@stages[i]</p>
+                </div>
+                @if (i < stages.Length - 1)
+                {
+                    <div class="step-line" style="height:2px;flex:0 0 24px;margin-top:14px;background:@(i < currentIdx ? "var(--color-background-success)" : "#e0e0e0")"></div>
+                }
+            }
+        </div>
+
+        @if (Model.Order.Status == OrderStatus.Cancelled)
+        {
+            <p style="color:#c0392b;font-size:13px;margin-bottom:16px"><i class="fa fa-circle-xmark"></i> This order is cancelled.</p>
+        }
+
+        <form asp-action="UpdateStatus" method="post" id="statusForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="orderId" value="@Model.Order.Id" />
+            <input type="hidden" name="status" id="statusInput" value="@Model.Order.Status" />
+
+            <label>Note (optional, included in customer email)</label>
+            <textarea name="note" rows="2" placeholder="e.g. Shipped via Aramex, tracking #12345"></textarea>
+
+            <div style="display:flex;gap:8px;margin-top:8px">
+                <button type="submit" class="btn-admin" id="advanceBtn" style="flex:1">Mark as Confirmed</button>
+                <button type="button" class="btn-admin btn-admin-danger" onclick="cancelOrder()">Cancel Order</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+
+@section Scripts {
+    <script>
+        const stages = ['Pending', 'Confirmed', 'Packed', 'Shipped', 'Delivered'];
+        const steps = document.querySelectorAll('.step-item');
+        const statusInput = document.getElementById('statusInput');
+        const advanceBtn = document.getElementById('advanceBtn');
+
+        function currentIndex() {
+            return stages.indexOf(statusInput.value);
+        }
+
+        steps.forEach(step => {
+            step.addEventListener('click', () => {
+                statusInput.value = step.dataset.status;
+                advanceBtn.textContent = 'Update to ' + step.dataset.status;
+            });
+        });
+
+        const idx = currentIndex();
+        if (idx >= 0 && idx < stages.length - 1) {
+            advanceBtn.textContent = 'Mark as ' + stages[idx + 1];
+            advanceBtn.addEventListener('click', (e) => {
+                statusInput.value = stages[idx + 1];
+            }, { once: false });
+        } else {
+            advanceBtn.textContent = 'Order Complete';
+            advanceBtn.disabled = true;
+        }
+
+        function cancelOrder() {
+            if (confirm('Cancel this order? This cannot be undone easily.')) {
+                statusInput.value = 'Cancelled';
+                document.getElementById('statusForm').submit();
+            }
+        }
+    </script>
+}

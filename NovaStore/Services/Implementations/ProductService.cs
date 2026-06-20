@@ -2,6 +2,7 @@
 using NovaStore.Data;
 using NovaStore.Models;
 using NovaStore.Services.Interfaces;
+using NovaStore.ViewModels.Admin;
 using NovaStore.ViewModels.Shop;
 
 namespace NovaStore.Services.Implementations
@@ -135,6 +136,227 @@ namespace NovaStore.Services.Implementations
                     CreatedAt = r.CreatedAt
                 }).ToList()
             };
+        }
+
+        public async Task<ProductListViewModel> GetShopListAsync(int? categoryId, int? collectionId, string sortBy, int page, int pageSize)
+        {
+            var query = _db.Products
+                .Include(p => p.Category)
+                .Include(p => p.Images)
+                .Where(p => p.IsActive);
+
+            if (categoryId.HasValue)
+                query = query.Where(p => p.CategoryId == categoryId.Value);
+
+            if (collectionId.HasValue)
+                query = query.Where(p => p.CollectionId == collectionId.Value);
+
+            query = sortBy switch
+            {
+                "newest" => query.OrderByDescending(p => p.CreatedAt),
+                "price_low" => query.OrderBy(p => p.Price),
+                "price_high" => query.OrderByDescending(p => p.Price),
+                _ => query.OrderByDescending(p => p.IsFeatured).ThenByDescending(p => p.CreatedAt)
+            };
+
+            var totalCount = await query.CountAsync();
+
+            var products = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var categories = await _db.Categories
+                .Select(c => new CategoryOption
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    ProductCount = c.Products.Count(p => p.IsActive)
+                })
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+
+            var collections = await _db.Collections
+                .Where(c => c.IsActive)
+                .Select(c => new CollectionOption { Id = c.Id, Name = c.Name })
+                .ToListAsync();
+
+            return new ProductListViewModel
+            {
+                Products = products.Select(ToCardViewModel).ToList(),
+                TotalCount = totalCount,
+                CurrentPage = page,
+                PageSize = pageSize,
+                Filters = new ShopFilterViewModel
+                {
+                    Categories = categories,
+                    Collections = collections,
+                    SelectedCategoryId = categoryId,
+                    SelectedCollectionId = collectionId,
+                    SortBy = sortBy,
+                    Page = page
+                }
+            };
+        }
+
+        public async Task<List<Product>> GetAllForAdminAsync() =>
+                    await _db.Products
+                        .Include(p => p.Category)
+                        .Include(p => p.Images)
+                        .OrderByDescending(p => p.CreatedAt)
+                        .ToListAsync();
+
+        public async Task<AdminProductFormViewModel> GetEditFormAsync(int? id)
+        {
+            var categories = await _db.Categories
+                .Select(c => new CategoryOptionSimple { Id = c.Id, Name = c.Name })
+                .ToListAsync();
+
+            var collections = await _db.Collections
+                .Select(c => new CollectionOptionSimple { Id = c.Id, Name = c.Name })
+                .ToListAsync();
+
+            if (id == null)
+            {
+                return new AdminProductFormViewModel
+                {
+                    CategoryOptions = categories,
+                    CollectionOptions = collections
+                };
+            }
+
+            var product = await _db.Products
+                .Include(p => p.Images)
+                .Include(p => p.Variants)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (product == null)
+                throw new InvalidOperationException("Product not found.");
+
+            return new AdminProductFormViewModel
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Slug = product.Slug,
+                Description = product.Description,
+                Price = product.Price,
+                OldPrice = product.OldPrice,
+                CategoryId = product.CategoryId,
+                CollectionId = product.CollectionId,
+                IsFeatured = product.IsFeatured,
+                IsActive = product.IsActive,
+                CategoryOptions = categories,
+                CollectionOptions = collections,
+                ExistingImages = product.Images.Select(i => new ExistingImage { Id = i.Id, FileName = i.FileName }).ToList(),
+                Variants = product.Variants.Select(v => new VariantInput
+                {
+                    Id = v.Id,
+                    Size = v.Size,
+                    Color = v.Color,
+                    SKU = v.SKU,
+                    StockQuantity = v.StockQuantity
+                }).ToList()
+            };
+        }
+
+        public async Task<int> SaveFromFormAsync(AdminProductFormViewModel model, string webRootPath)
+        {
+            Product product;
+
+            if (model.Id == 0)
+            {
+                product = new Product();
+                _db.Products.Add(product);
+            }
+            else
+            {
+                product = await _db.Products
+                    .Include(p => p.Variants)
+                    .FirstAsync(p => p.Id == model.Id);
+            }
+
+            product.Name = model.Name;
+            product.Slug = model.Slug;
+            product.Description = model.Description;
+            product.Price = model.Price;
+            product.OldPrice = model.OldPrice;
+            product.CategoryId = model.CategoryId;
+            product.CollectionId = model.CollectionId;
+            product.IsFeatured = model.IsFeatured;
+            product.IsActive = model.IsActive;
+
+            // Handle variants — simple approach: remove all, re-add from form
+            if (model.Id != 0)
+            {
+                _db.ProductVariants.RemoveRange(product.Variants);
+            }
+
+            foreach (var v in model.Variants.Where(v => !string.IsNullOrWhiteSpace(v.Size)))
+            {
+                product.Variants.Add(new ProductVariant
+                {
+                    Size = v.Size,
+                    Color = v.Color,
+                    SKU = v.SKU,
+                    StockQuantity = v.StockQuantity
+                });
+            }
+
+            await _db.SaveChangesAsync(); // Save first to get product.Id if new
+
+            // Handle new image uploads
+            if (model.NewImages != null && model.NewImages.Any())
+            {
+                var uploadFolder = Path.Combine(webRootPath, "images", "products");
+                Directory.CreateDirectory(uploadFolder);
+
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+                var maxSizeBytes = 5 * 1024 * 1024; // 5MB
+
+                int sortOrder = product.Images.Count;
+
+                foreach (var file in model.NewImages)
+                {
+                    var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+                    if (!allowedExtensions.Contains(ext))
+                        continue; // skip invalid file types silently — could also collect errors to show user
+
+                    if (file.Length > maxSizeBytes || file.Length == 0)
+                        continue;
+
+                    var guidFileName = $"{Guid.NewGuid()}{ext}";
+                    var filePath = Path.Combine(uploadFolder, guidFileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    _db.ProductImages.Add(new ProductImage
+                    {
+                        ProductId = product.Id,
+                        FileName = guidFileName,
+                        SortOrder = sortOrder++
+                    });
+                }
+
+                await _db.SaveChangesAsync();
+            }
+
+            return product.Id;
+        }
+
+        public async Task DeleteImageAsync(int imageId)
+        {
+            var image = await _db.ProductImages.FindAsync(imageId);
+            if (image != null)
+            {
+                _db.ProductImages.Remove(image);
+                await _db.SaveChangesAsync();
+                // Note: we're not deleting the physical file here to keep this simple;
+                // an orphaned file on disk is a minor issue, not a security risk.
+            }
         }
     }
 }

@@ -204,5 +204,26 @@ We'll notify you once your order ships.
 
 — NOVA";
         }
+
+        public async Task<List<Order>> GetAllForAdminAsync(string? statusFilter)
+        {
+            var query = _db.Orders
+                .Include(o => o.Items)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(statusFilter) &&
+                Enum.TryParse<OrderStatus>(statusFilter, out var status))
+            {
+                query = query.Where(o => o.Status == status);
+            }
+
+            return await query.OrderByDescending(o => o.CreatedAt).ToListAsync();
+        }
+
+        public async Task<Order?> GetByIdAsync(int id) =>
+            await _db.Orders
+                .Include(o => o.Items)
+                .Include(o => o.StatusHistory.OrderByDescending(h => h.ChangedAt))
+                .FirstOrDefaultAsync(o => o.Id == id);
     }
 }

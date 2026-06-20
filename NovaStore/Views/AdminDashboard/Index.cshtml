@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-topbar">
+    <h1>Dashboard</h1>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:32px">
+    <div class="stat-card">
+        <strong>@ViewBag.LowStockCount</strong>
+        <span>Low Stock Items</span>
+    </div>
+</div>
+
+@if (ViewBag.LowStockCount > 0)
+{
+    <div class="admin-card">
+        <h3 style="margin-bottom:16px;font-size:16px">⚠️ Low Stock Alert</h3>
+        <table class="admin-table">
+            <tr><th>Product</th><th>Variant</th><th>Stock Left</th></tr>
+            @foreach (var v in ViewBag.LowStockItems)
+            {
+                <tr>
+                    <td>@v.Product.Name</td>
+                    <td>@v.Color / @v.Size</td>
+                    <td>@v.StockQuantity</td>
+                </tr>
+            }
+        </table>
+    </div>
+}

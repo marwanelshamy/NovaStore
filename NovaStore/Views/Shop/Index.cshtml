@@ -1,6 +1,131 @@
-﻿namespace NovaStore.Views.Shop
-{
-    public class Index
-    {
-    }
+﻿@model NovaStore.ViewModels.Shop.ProductListViewModel
+
+@{
+    ViewData["Title"] = "Shop";
 }
+
+<div class="shop-banner">
+    <div class="shop-banner-content">
+        <h1>All Collections</h1>
+        <p>Home &nbsp;/&nbsp; Shop</p>
+    </div>
+</div>
+
+<div class="shop-layout">
+
+    <aside class="shop-sidebar">
+
+        <div class="filter-section">
+            <div class="filter-title">Category</div>
+            <div class="filter-options">
+                <a asp-action="Index" asp-route-categoryId="" asp-route-sortBy="@Model.Filters.SortBy"
+                   class="filter-option" style="text-decoration:none;color:inherit">
+                    All Items <span style="margin-left:auto;color:var(--gray-400)">@Model.TotalCount</span>
+                </a>
+                @foreach (var cat in Model.Filters.Categories)
+                {
+                    <a asp-action="Index" asp-route-categoryId="@cat.Id" asp-route-sortBy="@Model.Filters.SortBy"
+                       class="filter-option @(Model.Filters.SelectedCategoryId == cat.Id ? "active" : "")"
+                       style="text-decoration:none;color:inherit">
+                        @cat.Name <span style="margin-left:auto;color:var(--gray-400)">@cat.ProductCount</span>
+                    </a>
+                }
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-title">Collection</div>
+            <div class="filter-options">
+                @foreach (var col in Model.Filters.Collections)
+                {
+                    <a asp-action="Index" asp-route-collectionId="@col.Id" asp-route-sortBy="@Model.Filters.SortBy"
+                       class="filter-option @(Model.Filters.SelectedCollectionId == col.Id ? "active" : "")"
+                       style="text-decoration:none;color:inherit">
+                        @col.Name
+                    </a>
+                }
+            </div>
+        </div>
+
+    </aside>
+
+    <main>
+        <div class="shop-toolbar">
+            <p class="results-count">Showing <strong>@Model.Products.Count</strong> of @Model.TotalCount items</p>
+            <div class="toolbar-right">
+                <select class="sort-select" onchange="location.href='@Url.Action("Index", new { categoryId = Model.Filters.SelectedCategoryId, collectionId = Model.Filters.SelectedCollectionId })&sortBy=' + this.value">
+                    <option value="featured" selected="@(Model.Filters.SortBy == "featured")">Featured</option>
+                    <option value="newest" selected="@(Model.Filters.SortBy == "newest")">Newest First</option>
+                    <option value="price_low" selected="@(Model.Filters.SortBy == "price_low")">Price: Low to High</option>
+                    <option value="price_high" selected="@(Model.Filters.SortBy == "price_high")">Price: High to Low</option>
+                </select>
+            </div>
+        </div>
+
+        @if (!Model.Products.Any())
+        {
+            <p style="padding:60px 0;text-align:center;color:var(--gray-600)">No products found.</p>
+        }
+        else
+        {
+            <div class="shop-grid">
+                @foreach (var product in Model.Products)
+                {
+                    <div class="product-card" onclick="location.href='/Product/Details/@product.Slug'">
+                        <div class="product-img">
+                            <img src="~/images/products/@product.ImageFileName" alt="@product.Name">
+                            @if (product.IsNew)
+                            {
+                                <span class="product-badge badge-new">New</span>
+                            }
+                            else if (product.IsOnSale)
+                            {
+                                <span class="product-badge badge-sale">Sale</span>
+                            }
+                            <div class="product-actions">
+                                <button class="product-action-btn"><i class="fa fa-heart"></i></button>
+                                <button class="product-action-btn"><i class="fa fa-bag-shopping"></i></button>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <p class="product-category">@product.CategoryName</p>
+                            <h3 class="product-name">@product.Name</h3>
+                            <div class="product-price">
+                                @if (product.IsOnSale)
+                                {
+                                    <span class="price price-sale">$@product.Price</span>
+                                    <span class="price-old">$@product.OldPrice</span>
+                                }
+                                else
+                                {
+                                    <span class="price">$@product.Price</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (Model.TotalPages > 1)
+            {
+                <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:60px">
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <a asp-action="Index" asp-route-page="@i"
+                           asp-route-categoryId="@Model.Filters.SelectedCategoryId"
+                           asp-route-collectionId="@Model.Filters.SelectedCollectionId"
+                           asp-route-sortBy="@Model.Filters.SortBy"
+                           style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+                            border:1px solid @(i == Model.CurrentPage ? "var(--black)" : "var(--gray-200)");
+                            background:@(i == Model.CurrentPage ? "var(--black)" : "transparent");
+                            color:@(i == Model.CurrentPage ? "white" : "inherit");
+                            text-decoration:none;font-size:12px">
+                            @i
+                        </a>
+                    }
+                </div>
+            }
+        }
+
+    </main>
+</div>

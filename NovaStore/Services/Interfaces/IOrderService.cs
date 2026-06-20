@@ -11,5 +11,8 @@ namespace NovaStore.Services.Interfaces
         Task<IEnumerable<Order>> GetByUserAsync(string userId);
         Task<Order?> GetByNumberAsync(string orderNumber);
         Task UpdateStatusAsync(int orderId, OrderStatus status, string? note);
+
+        Task<List<Order>> GetAllForAdminAsync(string? statusFilter);
+        Task<Order?> GetByIdAsync(int id);
     }
 }
