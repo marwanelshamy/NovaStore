@@ -1,0 +1,49 @@
+﻿@model NovaStore.ViewModels.Admin.AdminCollectionFormViewModel
+
+@{
+    ViewData["Title"] = "Add Collection";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-topbar">
+    <h1>Add Collection</h1>
+</div>
+
+<div class="admin-card" style="max-width:480px">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <label>Name</label>
+        <input asp-for="Name" placeholder="e.g. Summer Drop" />
+        <span asp-validation-for="Name" style="color:#c0392b;font-size:12px"></span>
+
+        <label>Slug (URL-friendly)</label>
+        <input asp-for="Slug" placeholder="e.g. summer-2026" />
+        <span asp-validation-for="Slug" style="color:#c0392b;font-size:12px"></span>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>
+                <label>Season</label>
+                <input asp-for="Season" placeholder="e.g. SS" />
+            </div>
+            <div>
+                <label>Year</label>
+                <input asp-for="Year" type="number" placeholder="e.g. 2026" />
+            </div>
+        </div>
+
+        <label>Description</label>
+        <textarea asp-for="Description" rows="3"></textarea>
+
+        <div style="display:flex;gap:20px;margin-bottom:16px">
+            <label style="display:flex;align-items:center;gap:8px;margin:0">
+                <input asp-for="IsActive" type="checkbox" style="width:auto;margin:0" /> Active
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;margin:0">
+                <input asp-for="IsCurrent" type="checkbox" style="width:auto;margin:0" /> Set as Current Collection
+            </label>
+        </div>
+
+        <button type="submit" class="btn-admin" style="margin-top:8px">Create Collection</button>
+    </form>
+</div>

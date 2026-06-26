@@ -1,5 +1,110 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model NovaStore.ViewModels.Contact.ContactFormViewModel
+
 @{
+    ViewData["Title"] = "Contact Us";
 }
+
+<div class="contact-banner">
+    <div class="contact-banner-content">
+        <h1>Get in Touch</h1>
+        <p>Home &nbsp;/&nbsp; Contact</p>
+    </div>
+</div>
+
+<div class="contact-page">
+    <div class="contact-grid">
+
+        <div class="contact-info">
+            <p class="section-label">We'd Love to Hear From You</p>
+            <h2 class="section-title">Let's <em>Connect</em></h2>
+            <p>Whether you have a question about a piece, need styling advice, or want to arrange a private appointment — our team is here for you.</p>
+
+            <div class="contact-detail">
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fa fa-location-dot"></i></div>
+                    <div class="contact-item-text">
+                        <h4>Our Boutique</h4>
+                        <p>12 El-Sheikh Rihan St, Garden City<br>Cairo, Egypt 11451</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fa fa-clock"></i></div>
+                    <div class="contact-item-text">
+                        <h4>Opening Hours</h4>
+                        <p>Monday – Saturday: 10am – 8pm<br>Sunday: 12pm – 6pm</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="fa fa-envelope"></i></div>
+                    <div class="contact-item-text">
+                        <h4>Email</h4>
+                        <p><a href="mailto:hello@novastore.com" style="color:inherit">hello@novastore.com</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-form">
+            <h3>Send Us a Message</h3>
+
+            @if (Model.SubmittedSuccessfully)
+            {
+                <div class="success-banner" style="display:flex">
+                    <i class="fa fa-circle-check" style="font-size:18px"></i>
+                    <div>
+                        <strong style="font-size:13px">Message sent successfully!</strong>
+                        <p style="font-size:12px;margin:0">We'll get back to you within 24 hours.</p>
+                    </div>
+                </div>
+            }
+
+            <div asp-validation-summary="ModelOnly" style="color:#c0392b;font-size:13px;margin-bottom:16px"></div>
+
+            <form asp-controller="Contact" asp-action="Submit" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input asp-for="FullName" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address *</label>
+                    <input asp-for="Email" type="email" />
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input asp-for="Phone" />
+                </div>
+
+                <div class="form-group">
+                    <label>Subject *</label>
+                    <select asp-for="Subject">
+                        <option value="" disabled selected>Select a topic</option>
+                        <option>Order Inquiry</option>
+                        <option>Return or Exchange</option>
+                        <option>Styling Advice</option>
+                        <option>Private Appointment</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Order Number (if applicable)</label>
+                    <input asp-for="OrderNumber" placeholder="NV-2026-XXXXXX" />
+                </div>
+
+                <div class="form-group">
+                    <label>Message *</label>
+                    <textarea asp-for="Message" placeholder="How can we help you?"></textarea>
+                </div>
+
+                <button type="submit" class="form-submit">Send Message &nbsp;<i class="fa fa-arrow-right"></i></button>
+            </form>
+        </div>
+
+    </div>
+</div>

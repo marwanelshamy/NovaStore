@@ -94,6 +94,7 @@
             {
                 var v = i < Model.Variants.Count ? Model.Variants[i] : null;
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+                    <input type="hidden" name="Variants[@i].Id" value="@(v?.Id ?? 0)" />
                     <input name="Variants[@i].Size" placeholder="Size (e.g. M)" value="@v?.Size" />
                     <input name="Variants[@i].Color" placeholder="Color (e.g. Sand)" value="@v?.Color" />
                     <input name="Variants[@i].SKU" placeholder="SKU" value="@v?.SKU" />

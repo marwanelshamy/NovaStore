@@ -1,5 +1,30 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿@model NovaStore.ViewModels.Shop.ProductCardViewModel
+
+<div class="product-card" onclick="location.href='@Url.Action("Details", "Product", new { id = Model.Slug })'">
+    <div class="product-img">
+        <img src="~/images/products/@Model.ImageFileName" alt="@Model.Name">
+        @if (Model.IsNew)
+        {
+            <span class="product-badge badge-new">New</span>
+        }
+        else if (Model.IsOnSale)
+        {
+            <span class="product-badge badge-sale">Sale</span>
+        }
+    </div>
+    <div class="product-info">
+        <p class="product-category">@Model.CategoryName</p>
+        <h3 class="product-name">@Model.Name</h3>
+        <div class="product-price">
+            @if (Model.IsOnSale)
+            {
+                <span class="price price-sale">$@Model.Price</span>
+                <span class="price-old">$@Model.OldPrice</span>
+            }
+            else
+            {
+                <span class="price">$@Model.Price</span>
+            }
+        </div>
+    </div>
+</div>

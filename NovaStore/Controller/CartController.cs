@@ -9,11 +9,13 @@ namespace NovaStore.Controllers
     public class CartController : Controller
     {
         private readonly ICartService _cartService;
+        private readonly ICouponService _couponService;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public CartController(ICartService cartService, UserManager<ApplicationUser> userManager)
+        public CartController(ICartService cartService, ICouponService couponService, UserManager<ApplicationUser> userManager)
         {
             _cartService = cartService;
+            _couponService = couponService;
             _userManager = userManager;
         }
 
@@ -30,7 +32,8 @@ namespace NovaStore.Controllers
         public async Task<IActionResult> Index()
         {
             var (userId, sessionId) = await GetIdentity();
-            var cart = await _cartService.GetCartAsync(userId, sessionId);
+            var coupon = CartHelper.GetCoupon(HttpContext);
+            var cart = await _cartService.GetCartAsync(userId, sessionId, coupon);
             return View(cart);
         }
 
@@ -60,6 +63,30 @@ namespace NovaStore.Controllers
         {
             var (userId, _) = await GetIdentity();
             await _cartService.RemoveItemAsync(cartItemId, userId);
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApplyCoupon(string couponCode)
+        {
+            var (userId, sessionId) = await GetIdentity();
+            var cart = await _cartService.GetCartAsync(userId, sessionId);
+
+            var coupon = await _couponService.ValidateAsync(couponCode);
+
+            if (coupon != null)
+            {
+                CartHelper.SetCoupon(HttpContext, couponCode);
+                var discount = cart.Subtotal * (coupon.DiscountPercent / 100m);
+                TempData["CouponMessage"] = $"✓ Coupon applied! {couponCode.ToUpper()} — {coupon.DiscountPercent}% off";
+            }
+            else
+            {
+                CartHelper.SetCoupon(HttpContext, null);
+                TempData["CouponMessage"] = "Invalid or expired coupon code.";
+            }
+
             return RedirectToAction("Index");
         }
     }

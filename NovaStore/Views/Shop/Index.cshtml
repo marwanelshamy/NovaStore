@@ -53,7 +53,7 @@
         <div class="shop-toolbar">
             <p class="results-count">Showing <strong>@Model.Products.Count</strong> of @Model.TotalCount items</p>
             <div class="toolbar-right">
-                <select class="sort-select" onchange="location.href='@Url.Action("Index", new { categoryId = Model.Filters.SelectedCategoryId, collectionId = Model.Filters.SelectedCollectionId })&sortBy=' + this.value">
+                <select class="sort-select" onchange="changeSorting(this.value)">
                     <option value="featured" selected="@(Model.Filters.SortBy == "featured")">Featured</option>
                     <option value="newest" selected="@(Model.Filters.SortBy == "newest")">Newest First</option>
                     <option value="price_low" selected="@(Model.Filters.SortBy == "price_low")">Price: Low to High</option>
@@ -71,37 +71,8 @@
             <div class="shop-grid">
                 @foreach (var product in Model.Products)
                 {
-                    <div class="product-card" onclick="location.href='/Product/Details/@product.Slug'">
-                        <div class="product-img">
-                            <img src="~/images/products/@product.ImageFileName" alt="@product.Name">
-                            @if (product.IsNew)
-                            {
-                                <span class="product-badge badge-new">New</span>
-                            }
-                            else if (product.IsOnSale)
-                            {
-                                <span class="product-badge badge-sale">Sale</span>
-                            }
-                            <div class="product-actions">
-                                <button class="product-action-btn"><i class="fa fa-heart"></i></button>
-                                <button class="product-action-btn"><i class="fa fa-bag-shopping"></i></button>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <p class="product-category">@product.CategoryName</p>
-                            <h3 class="product-name">@product.Name</h3>
-                            <div class="product-price">
-                                @if (product.IsOnSale)
-                                {
-                                    <span class="price price-sale">$@product.Price</span>
-                                    <span class="price-old">$@product.OldPrice</span>
-                                }
-                                else
-                                {
-                                    <span class="price">$@product.Price</span>
-                                }
-                            </div>
-                        </div>
+                    <div>
+                        @await Html.PartialAsync("_ProductCard", product)
                     </div>
                 }
             </div>
@@ -129,3 +100,14 @@
 
     </main>
 </div>
+
+@section Scripts {
+    <script>
+        function changeSorting(sortValue) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('sortBy', sortValue);
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        }
+    </script>
+}

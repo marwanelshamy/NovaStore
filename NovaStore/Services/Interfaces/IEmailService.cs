@@ -2,6 +2,11 @@
 {
     public interface IEmailService
     {
-        Task SendAsync(string to, string subject, string htmlBody);
+        Task SendAsync(string to, string subject, string body);
+        Task SendOrderConfirmationAsync(
+            string customerEmail,
+            string customerName,
+            int orderId,
+            decimal total);
     }
 }

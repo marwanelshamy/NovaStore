@@ -1,71 +1,177 @@
 ﻿@model IEnumerable<NovaStore.ViewModels.Shop.ProductCardViewModel>
-
 @{
     ViewData["Title"] = "Home";
 }
-
 <!-- Hero -->
-<section class="hero">
-    <div class="hero-image">
-        <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=900&q=80" alt="Summer Collection">
-    </div>
-    <div class="hero-text">
-        <p class="hero-eyebrow">New Arrival — SS 2025</p>
-        <h1 class="hero-title">Desert<br><em>Bloom</em><br>Collection</h1>
-        <p class="hero-desc">Flowing silhouettes inspired by the warmth of sand dunes and the quiet elegance of the evening sky.</p>
-        <div class="hero-actions">
-            <a asp-controller="Shop" asp-action="Index" class="btn btn-dark">Shop Collection <i class="fa fa-arrow-right"></i></a>
-            <a asp-controller="Shop" asp-action="Index" class="btn btn-outline">Explore All</a>
+<section class="hero-v3">
+    <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1400&q=85" alt="Desert Bloom Collection">
+    <div class="hero-v3-overlay"></div>
+    <div class="hero-v3-content">
+        <p class="hero-v3-eyebrow">Desert Bloom — SS 2025</p>
+        <h1 class="hero-v3-title">Bloom<br>where<br>you stand</h1>
+        <p class="hero-v3-desc">48 pieces. Hand finished in Cairo. Built for movement, not just for looking good standing still.</p>
+        <div class="hero-v3-actions">
+            <a asp-controller="Shop" asp-action="Index" class="btn-v3-solid">Shop the Drop</a>
+            <a asp-controller="Collections" asp-action="Index" class="btn-v3-ghost">Explore Lookbook</a>
         </div>
-        <div class="hero-scroll">Scroll to Discover</div>
+    </div>
+</section>
+
+<!-- Categories -->
+<section class="cat-scroll-section">
+    <div class="cat-scroll-header">
+        <p class="cat-scroll-label">Shop by Category</p>
+        <h2 class="cat-scroll-title">Find Your Fit</h2>
+    </div>
+    <div class="cat-scroll-track">
+        <div class="cat-scroll-card" onclick="location.href='/Shop'">
+            <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=500&q=80" alt="Women">
+            <div class="cat-scroll-overlay"></div>
+            <div class="cat-scroll-label-tag">Women</div>
+        </div>
+        <div class="cat-scroll-card" onclick="location.href='/Shop'">
+            <img src="~/images/products/048d044d-40ab-46d6-88cf-6e5558c8db7c.png" alt="Men">
+            <div class="cat-scroll-overlay"></div>
+            <div class="cat-scroll-label-tag">Men</div>
+        </div>
+        <div class="cat-scroll-card" onclick="location.href='/Shop'">
+            <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&q=80" alt="Accessories">
+            <div class="cat-scroll-overlay"></div>
+            <div class="cat-scroll-label-tag">Accessories</div>
+        </div>
+        <div class="cat-scroll-card dark-card" onclick="location.href='/Shop'">
+            <img src="~/images/products/NewArrival.png" alt="Accessories">
+            <div class="cat-scroll-label-tag">New Arrivals</div>
+        </div>
     </div>
 </section>
 
 <!-- Featured Products -->
-<section class="featured">
-    <div class="section-header">
+<section class="featured-v2">
+    <div class="featured-v2-header">
         <div>
             <p class="section-label">Handpicked</p>
             <h2 class="section-title">Best <em>Sellers</em></h2>
         </div>
-        <a asp-controller="Shop" asp-action="Index" class="btn btn-outline">View All</a>
+        <a asp-controller="Shop" asp-action="Index" style="font-size:13px;display:flex;align-items:center;gap:4px">View All <i class="fa fa-arrow-right"></i></a>
     </div>
-    <div class="products-grid">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
         @foreach (var product in Model)
         {
-            <div class="product-card" onclick="location.href='/Product/Details/@product.Slug'">
-                <div class="product-img">
+            <div class="product-card-v2" onclick="location.href='/Product/Details/@product.Slug'">
+                <div class="product-card-v2-img">
                     <img src="~/images/products/@product.ImageFileName" alt="@product.Name">
                     @if (product.IsNew)
                     {
-                        <span class="product-badge badge-new">New</span>
+                        <span class="product-card-v2-badge new">New</span>
                     }
                     else if (product.IsOnSale)
                     {
-                        <span class="product-badge badge-sale">Sale</span>
+                        <span class="product-card-v2-badge sale">Sale</span>
                     }
-                    <div class="product-actions">
-                        <button class="product-action-btn"><i class="fa fa-heart"></i></button>
-                        <button class="product-action-btn"><i class="fa fa-eye"></i></button>
-                        <button class="product-action-btn"><i class="fa fa-bag-shopping"></i></button>
-                    </div>
                 </div>
-                <div class="product-info">
-                    <p class="product-category">@product.CategoryName</p>
-                    <h3 class="product-name">@product.Name</h3>
-                    <div class="product-price">
-                        @if (product.IsOnSale)
-                        {
-                            <span class="price price-sale">$@product.Price</span>
-                            <span class="price-old">$@product.OldPrice</span>
-                        }
-                        else
-                        {
-                            <span class="price">$@product.Price</span>
-                        }
-                    </div>
-                </div>
+                <p class="product-card-v2-category">@product.CategoryName</p>
+                <p class="product-card-v2-name">@product.Name</p>
+                <p class="product-card-v2-price">
+                    @if (product.IsOnSale)
+                    {
+                        <span style="text-decoration:line-through;color:var(--gray-400);margin-right:6px">$@product.OldPrice</span>
+                    }
+                    $@product.Price
+                </p>
             </div>
         }
+    </div>
+</section>
+
+<!-- Shop by Drop -->
+<section class="drop-section">
+    <div class="drop-header">
+        <p class="drop-label">Shop by Drop</p>
+        <h2 class="drop-title">Find Your Perfect Style</h2>
+    </div>
+    <div class="drop-grid">
+        <div class="drop-tile" onclick="location.href='/Collections'">
+            <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=700&q=80" alt="Desert Bloom SS25">
+            <div class="drop-tile-overlay"></div>
+            <p class="drop-tile-title">SS '25</p>
+            <button class="drop-tile-btn">Shop Now</button>
+        </div>
+        <div class="drop-tile dark-tile" onclick="location.href='/Collections'">
+            <p class="drop-tile-title">FW '24</p>
+            <button class="drop-tile-btn">Shop Now</button>
+        </div>
+    </div>
+</section>
+
+<!-- Promo Spotlight -->
+<section class="spotlight-section">
+    <div class="spotlight-grid">
+        <div class="spotlight-image">
+            <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800&q=80" alt="NOVA Jackets">
+        </div>
+        <div class="spotlight-text">
+            <p class="spotlight-eyebrow">New Category · Never Sold Before</p>
+            <h2 class="spotlight-title">NOVA Goes<br>Outerwear</h2>
+            <p class="spotlight-desc">Heavyweight jackets, cut for cool Cairo nights. This is a category we've never touched — until now.</p>
+            <p class="spotlight-price">Starting from $2500</p>
+            <a asp-controller="Shop" asp-action="Index" asp-route-categoryId="8" class="spotlight-btn">Shop Jackets</a>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials-section">
+    <div class="testimonials-header">
+        <p class="testimonials-label">Real People, Real Style</p>
+        <h2 class="testimonials-title">What Cairo Is Wearing</h2>
+    </div>
+    <div class="testimonials-grid">
+        <div class="testimonial-card">
+            <div class="testimonial-stars">★★★★★</div>
+            <p class="testimonial-text">"The hoodie fit is perfect — not too boxy, not too tight. Quality feels way above the price point."</p>
+            <div class="testimonial-author">
+                <div class="testimonial-avatar"></div>
+                <div>
+                    <p class="testimonial-name">Marwan E.</p>
+                    <p class="testimonial-verified">Verified Buyer</p>
+                </div>
+            </div>
+        </div>
+        <div class="testimonial-card">
+            <div class="testimonial-stars">★★★★★</div>
+            <p class="testimonial-text">"Shipping was faster than I expected and the packaging felt premium. Will definitely order again."</p>
+            <div class="testimonial-author">
+                <div class="testimonial-avatar"></div>
+                <div>
+                    <p class="testimonial-name">Layla A.</p>
+                    <p class="testimonial-verified">Verified Buyer</p>
+                </div>
+            </div>
+        </div>
+        <div class="testimonial-card">
+            <div class="testimonial-stars">★★★★½</div>
+            <p class="testimonial-text">"Fabric quality is genuinely impressive. Cop the desert dune dress before it's gone."</p>
+            <div class="testimonial-author">
+                <div class="testimonial-avatar"></div>
+                <div>
+                    <p class="testimonial-name">Sara K.</p>
+                    <p class="testimonial-verified">Verified Buyer</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Lookbook Banner -->
+<section class="lookbook-section">
+    <div class="lookbook-banner" onclick="location.href='/Collections'">
+        <img src="https://images.unsplash.com/photo-1536243298747-ea8874136d64?w=1400&q=80" alt="SS25 Lookbook">
+        <div class="lookbook-banner-overlay"></div>
+        <div class="lookbook-banner-content">
+            <p class="lookbook-banner-eyebrow">SS '25 Editorial</p>
+            <h2 class="lookbook-banner-title">The Full Story</h2>
+            <a asp-controller="Collections" asp-action="Index" class="lookbook-banner-btn">View Lookbook</a>
+        </div>
     </div>
 </section>

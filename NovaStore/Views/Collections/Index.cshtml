@@ -1,5 +1,47 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model NovaStore.ViewModels.Shop.CollectionListViewModel
+
 @{
+    ViewData["Title"] = "Collections";
 }
+
+<div class="shop-banner">
+    <div class="shop-banner-content">
+        <h1>Collections</h1>
+        <p>Home &nbsp;/&nbsp; Collections</p>
+    </div>
+</div>
+
+<div style="max-width:1200px;margin:0 auto;padding:80px 24px">
+
+    @if (!Model.Collections.Any())
+    {
+        <p style="text-align:center;color:var(--gray-600)">No collections available yet.</p>
+    }
+    else
+    {
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:24px">
+            @foreach (var c in Model.Collections)
+            {
+                <a asp-action="Details" asp-route-slug="@c.Slug" style="text-decoration:none;color:inherit;display:block;position:relative;overflow:hidden;border-radius:8px;aspect-ratio:4/3">
+                    @if (!string.IsNullOrEmpty(c.CoverImageFileName))
+                    {
+                        <img src="~/images/collections/@c.CoverImageFileName" alt="@c.Name" style="width:100%;height:100%;object-fit:cover">
+                    }
+                    else
+                    {
+                        <div style="width:100%;height:100%;background:var(--gray-100)"></div>
+                    }
+                    <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.1) 55%)"></div>
+                    <div style="position:absolute;bottom:0;left:0;right:0;padding:28px;color:white">
+                        <p style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:8px">
+                            @c.Season @c.Year @(c.IsCurrent ? "· Current" : "")
+                        </p>
+                        <h2 style="font-family:'Cormorant Garamond',serif;font-size:28px;margin-bottom:6px">@c.Name</h2>
+                        <p style="font-size:12px;opacity:0.8">@c.ProductCount pieces</p>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+
+</div>

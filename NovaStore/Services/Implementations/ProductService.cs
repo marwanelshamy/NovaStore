@@ -286,20 +286,49 @@ namespace NovaStore.Services.Implementations
             product.IsActive = model.IsActive;
 
             // Handle variants — simple approach: remove all, re-add from form
-            if (model.Id != 0)
+            // Handle variants — update existing ones by Id, add new ones, only delete unreferenced ones
+            var submittedVariants = model.Variants.Where(v => !string.IsNullOrWhiteSpace(v.Size)).ToList();
+            var submittedIds = submittedVariants.Where(v => v.Id != 0).Select(v => v.Id).ToHashSet();
+
+            // Variants that existed before but are no longer in the submitted form
+            var variantsToRemove = product.Variants.Where(v => !submittedIds.Contains(v.Id)).ToList();
+
+            foreach (var toRemove in variantsToRemove)
             {
-                _db.ProductVariants.RemoveRange(product.Variants);
+                var hasOrders = await _db.OrderItems.AnyAsync(oi => oi.ProductVariantId == toRemove.Id);
+                if (!hasOrders)
+                {
+                    _db.ProductVariants.Remove(toRemove);
+                }
+                // If it has orders, we silently keep it in the database (but it won't show in the form anymore
+                // unless we explicitly reload it — acceptable tradeoff to preserve order history integrity)
             }
 
-            foreach (var v in model.Variants.Where(v => !string.IsNullOrWhiteSpace(v.Size)))
+            foreach (var v in submittedVariants)
             {
-                product.Variants.Add(new ProductVariant
+                if (v.Id != 0)
                 {
-                    Size = v.Size,
-                    Color = v.Color,
-                    SKU = v.SKU,
-                    StockQuantity = v.StockQuantity
-                });
+                    // Update existing variant
+                    var existing = product.Variants.FirstOrDefault(pv => pv.Id == v.Id);
+                    if (existing != null)
+                    {
+                        existing.Size = v.Size;
+                        existing.Color = v.Color;
+                        existing.SKU = v.SKU;
+                        existing.StockQuantity = v.StockQuantity;
+                    }
+                }
+                else
+                {
+                    // New variant
+                    product.Variants.Add(new ProductVariant
+                    {
+                        Size = v.Size,
+                        Color = v.Color,
+                        SKU = v.SKU,
+                        StockQuantity = v.StockQuantity
+                    });
+                }
             }
 
             await _db.SaveChangesAsync(); // Save first to get product.Id if new
@@ -357,6 +386,50 @@ namespace NovaStore.Services.Implementations
                 // Note: we're not deleting the physical file here to keep this simple;
                 // an orphaned file on disk is a minor issue, not a security risk.
             }
+        }
+
+        public async Task<CollectionListViewModel> GetCollectionListAsync()
+        {
+            var collections = await _db.Collections
+                .Where(c => c.IsActive)
+                .OrderByDescending(c => c.Year)
+                .ThenByDescending(c => c.IsCurrent)
+                .Select(c => new CollectionSummary
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Slug = c.Slug,
+                    Season = c.Season,
+                    Year = c.Year,
+                    Description = c.Description,
+                    CoverImageFileName = c.CoverImageFileName,
+                    IsCurrent = c.IsCurrent,
+                    ProductCount = c.Products.Count(p => p.IsActive)
+                })
+                .ToListAsync();
+
+            return new CollectionListViewModel { Collections = collections };
+        }
+
+        public async Task<CollectionDetailViewModel?> GetCollectionDetailAsync(string slug)
+        {
+            var collection = await _db.Collections.FirstOrDefaultAsync(c => c.Slug == slug && c.IsActive);
+            if (collection == null) return null;
+
+            var products = await _db.Products
+                .Include(p => p.Category)
+                .Include(p => p.Images)
+                .Where(p => p.CollectionId == collection.Id && p.IsActive)
+                .ToListAsync();
+
+            return new CollectionDetailViewModel
+            {
+                Name = collection.Name,
+                Season = collection.Season,
+                Year = collection.Year,
+                Description = collection.Description,
+                Products = products.Select(ToCardViewModel).ToList()
+            };
         }
     }
 }

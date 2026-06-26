@@ -84,6 +84,26 @@
                         <span>$@Model.Tax.ToString("0.00")</span>
                     </div>
 
+                    @if (Model.CouponApplied)
+                    {
+                        <div class="summary-row" style="color:var(--camel)">
+                            <span>Discount (@Model.CouponCode)</span>
+                            <span>−$@Model.Discount.ToString("0.00")</span>
+                        </div>
+                    }
+
+                    <form asp-controller="Cart" asp-action="ApplyCoupon" method="post" class="coupon-row">
+                        @Html.AntiForgeryToken()
+                        <input type="text" name="couponCode" placeholder="Coupon code">
+                        <button type="submit">Apply</button>
+                    </form>
+                    @if (TempData["CouponMessage"] != null)
+                    {
+                        <p style="font-size:11px;margin-top:-16px;margin-bottom:16px;min-height:16px;color:@(Model.CouponApplied ? "var(--camel)" : "#c0392b")">
+                            @TempData["CouponMessage"]
+                        </p>
+                    }
+
                     <div class="summary-row total">
                         <span>Total</span>
                         <span>$@Model.Total.ToString("0.00")</span>

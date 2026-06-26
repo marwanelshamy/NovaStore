@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Categories";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-topbar">
+    <h1>Categories</h1>
+    <a asp-action="Create" class="btn-admin">+ Add Category</a>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div style="background:#fbe9e9;color:#c0392b;padding:14px 18px;border-radius:8px;margin-bottom:20px;font-size:13px">
+        @TempData["Error"]
+    </div>
+}
+
+<div class="admin-card">
+    <table class="admin-table">
+        <tr>
+            <th>Name</th>
+            <th>Slug</th>
+            <th>Sort Order</th>
+            <th>Products</th>
+            <th></th>
+        </tr>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td><strong>@c.Name</strong></td>
+                <td>@c.Slug</td>
+                <td>@c.SortOrder</td>
+                <td>@c.ProductCount</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@c.Id" class="btn-admin btn-admin-outline">Edit</a>
+                    <form asp-action="Delete" asp-route-id="@c.Id" method="post" style="display:inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-admin btn-admin-danger" onclick="return confirm('Delete this category?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </table>
+</div>

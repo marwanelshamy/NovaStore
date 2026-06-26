@@ -20,7 +20,7 @@
         <h3 style="margin-bottom:16px;font-size:16px">⚠️ Low Stock Alert</h3>
         <table class="admin-table">
             <tr><th>Product</th><th>Variant</th><th>Stock Left</th></tr>
-            @foreach (var v in ViewBag.LowStockItems)
+            @foreach (var v in (IEnumerable<NovaStore.Models.ProductVariant>)ViewBag.LowStockItems)
             {
                 <tr>
                     <td>@v.Product.Name</td>

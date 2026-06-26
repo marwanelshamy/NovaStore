@@ -20,7 +20,8 @@ namespace NovaStore.Services.Interfaces
         Task<int> SaveFromFormAsync(AdminProductFormViewModel model, string webRootPath);
         Task DeleteImageAsync(int imageId);
         Task<ProductDetailViewModel?> GetDetailBySlugAsync(string slug);
-
+        Task<CollectionListViewModel> GetCollectionListAsync();
+        Task<CollectionDetailViewModel?> GetCollectionDetailAsync(string slug);
         Task<ProductListViewModel> GetShopListAsync(int? categoryId, int? collectionId, string sortBy, int page, int pageSize);
     }
 }

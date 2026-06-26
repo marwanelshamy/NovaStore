@@ -1,6 +1,62 @@
-﻿namespace NovaStore.Views.Collections
-{
-    public class Details
-    {
-    }
+﻿@model NovaStore.ViewModels.Shop.CollectionDetailViewModel
+
+@{
+    ViewData["Title"] = Model.Name;
 }
+
+<div class="shop-banner">
+    <div class="shop-banner-content">
+        <h1>@Model.Name</h1>
+        <p>@Model.Season @Model.Year</p>
+    </div>
+</div>
+
+<div style="max-width:1200px;margin:0 auto;padding:60px 24px">
+
+    @if (!string.IsNullOrEmpty(Model.Description))
+    {
+        <p style="max-width:600px;margin:0 auto 50px;text-align:center;color:var(--gray-600);line-height:1.8">@Model.Description</p>
+    }
+
+    @if (!Model.Products.Any())
+    {
+        <p style="text-align:center;color:var(--gray-600)">No products in this collection yet.</p>
+    }
+    else
+    {
+        <div class="shop-grid">
+            @foreach (var product in Model.Products)
+            {
+                <div class="product-card" onclick="location.href='/Product/Details/@product.Slug'">
+                    <div class="product-img">
+                        <img src="~/images/products/@product.ImageFileName" alt="@product.Name">
+                        @if (product.IsNew)
+                        {
+                            <span class="product-badge badge-new">New</span>
+                        }
+                        else if (product.IsOnSale)
+                        {
+                            <span class="product-badge badge-sale">Sale</span>
+                        }
+                    </div>
+                    <div class="product-info">
+                        <p class="product-category">@product.CategoryName</p>
+                        <h3 class="product-name">@product.Name</h3>
+                        <div class="product-price">
+                            @if (product.IsOnSale)
+                            {
+                                <span class="price price-sale">$@product.Price</span>
+                                <span class="price-old">$@product.OldPrice</span>
+                            }
+                            else
+                            {
+                                <span class="price">$@product.Price</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+</div>

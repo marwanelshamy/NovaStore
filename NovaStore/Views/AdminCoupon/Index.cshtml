@@ -1,0 +1,52 @@
+﻿@model IEnumerable<NovaStore.Models.Coupon>
+
+@{
+    ViewData["Title"] = "Coupons";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-topbar">
+    <h1>Coupons</h1>
+    <a asp-action="Create" class="btn-admin">+ Add Coupon</a>
+</div>
+
+<div class="admin-card">
+    <table class="admin-table">
+        <tr>
+            <th>Code</th>
+            <th>Discount</th>
+            <th>Expiry</th>
+            <th>Usage</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td><strong>@c.Code</strong></td>
+                <td>@c.DiscountPercent%</td>
+                <td>@(c.ExpiryDate?.ToString("MMM d, yyyy") ?? "No expiry")</td>
+                <td>@c.UsedCount / @(c.UsageLimit?.ToString() ?? "∞")</td>
+                <td>
+                    @if (c.IsValid)
+                    {
+                        <span style="background:#e6f4ea;color:#1e7e34;padding:3px 10px;border-radius:4px;font-size:12px;font-weight:600">Active</span>
+                    }
+                    else
+                    {
+                        <span style="background:#f0f0f0;color:#666;padding:3px 10px;border-radius:4px;font-size:12px;font-weight:600">Inactive</span>
+                    }
+                </td>
+                <td>
+                    @if (c.IsActive)
+                    {
+                        <form asp-action="Disable" asp-route-id="@c.Id" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-admin btn-admin-outline" onclick="return confirm('Disable this coupon?')">Disable</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+</div>

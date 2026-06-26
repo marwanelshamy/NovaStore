@@ -10,6 +10,7 @@ using NovaStore.Settings;
 using SixLabors.ImageSharp.Web.DependencyInjection;
 using System.Threading.RateLimiting;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ── 1. SETTINGS ────────────────────────────────────────────────────
@@ -135,7 +136,9 @@ app.UseSession();
 // ── 10. ROUTES ─────────────────────────────────────────────────────
 app.MapControllerRoute(
     name: "admin",
-    pattern: "Admin/{controller=AdminDashboard}/{action=Index}/{id?}");
+    pattern: "Admin/{action=Index}/{id?}",
+    defaults: new { controller = "AdminDashboard" },
+    constraints: new { controller = "AdminDashboard|AdminProduct|AdminOrder" });
 
 app.MapControllerRoute(
     name: "default",

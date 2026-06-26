@@ -7,13 +7,33 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+ 
 </head>
 <body>
+    <div class="promo-bar">
+        <span>Desert Bloom SS25 — Now Live</span>
+        <span class="sep">|</span>
+        <span>Free Shipping Over $150</span>
+        <span class="sep">|</span>
+        <span>Ships in 3–5 Days</span>
+    </div>
     <header>
         <nav class="navbar">
             <div class="nav-links">
                 <a asp-controller="Home" asp-action="Index" class="active">Home</a>
-                <a asp-controller="Shop" asp-action="Index">Shop</a>
+                <div class="nav-drop">
+                    <a asp-controller="Shop" asp-action="Index">Shop <i class="fa fa-chevron-down" style="font-size:9px"></i></a>
+                    <div class="nav-drop-menu">
+                        <a asp-controller="Shop" asp-action="Index">All Items</a>
+                        <a asp-controller="Shop" asp-action="Index" asp-route-categoryId="4">Hoodie</a>
+                        <a asp-controller="Shop" asp-action="Index" asp-route-categoryId="5">T-Shirt</a>
+                        <a asp-controller="Shop" asp-action="Index" asp-route-categoryId="6">Sweatpants</a>
+                        <a asp-controller="Shop" asp-action="Index" asp-route-categoryId="7">Pants</a>
+                        <a asp-controller="Shop" asp-action="Index" asp-route-categoryId="8">Jacket</a>
+                        <a asp-controller="Shop" asp-action="Index" asp-route-categoryId="10">Dress</a>
+                        <a asp-controller="Shop" asp-action="Index" asp-route-categoryId="11">Bags</a>
+                    </div>
+                </div>
                 <a asp-controller="Collections" asp-action="Index">Collections</a>
             </div>
             <a asp-controller="Home" asp-action="Index" class="logo">NOVA</a>
@@ -21,6 +41,9 @@
                 <i class="fa fa-search"></i>
                 @if (User.Identity?.IsAuthenticated == true)
                 {
+                    <a asp-controller="Order" asp-action="MyOrders" style="color:inherit;margin-right:12px" title="My Orders">
+                        <i class="fa fa-bag-shopping"></i>
+                    </a>
                     <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline">
                         @Html.AntiForgeryToken()
                         <button type="submit" style="background:none;border:none;cursor:pointer;color:inherit;font-size:inherit" title="Logout">
@@ -43,11 +66,9 @@
     </header>
 
 
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+    <main role="main">
+        @RenderBody()
+    </main>
 
 
 
@@ -67,17 +88,17 @@
             <div class="footer-col">
                 <h4>Shop</h4>
                 <ul>
-                    <li><a href="shop.html">New Arrivals</a></li>
-                    <li><a href="shop.html">Women</a></li>
-                    <li><a href="shop.html">Men</a></li>
-                    <li><a href="shop.html">Accessories</a></li>
-                    <li><a href="shop.html">Sale</a></li>
+                    <li><a asp-controller="Shop" asp-action="Index">New Arrivals</a></li>
+                    <li><a asp-controller="Shop" asp-action="Index">Women</a></li>
+                    <li><a asp-controller="Shop" asp-action="Index">Men</a></li>
+                    <li><a asp-controller="Shop" asp-action="Index">Accessories</a></li>
+                    <li><a asp-controller="Shop" asp-action="Index">Sale</a></li>
                 </ul>
             </div>
             <div class="footer-col">
                 <h4>Help</h4>
                 <ul>
-                    <li><a href="contact.html">Contact Us</a></li>
+                    <li><a asp-controller="Contact" asp-action="Index">Contact Us</a></li>
                     <li><a href="#">Shipping & Returns</a></li>
                     <li><a href="#">Size Guide</a></li>
                     <li><a href="#">FAQ</a></li>
@@ -100,6 +121,24 @@
             <p>Privacy Policy · Terms of Service · Cookie Settings</p>
         </div>
     </footer>
+
+    <div class="social-fab" id="socialFab">
+        <a href="https://wa.me/201000000000" target="_blank" class="social-fab-item whatsapp" title="WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+        <a href="https://instagram.com/novastore" target="_blank" class="social-fab-item instagram" title="Instagram">
+            <i class="fab fa-instagram"></i>
+        </a>
+        <a href="https://tiktok.com/" target="_blank" class="social-fab-item tiktok" title="TikTok">
+            <i class="fab fa-tiktok"></i>
+        </a>
+        <a href="https://facebook.com/novastore" target="_blank" class="social-fab-item facebook" title="Facebook">
+            <i class="fab fa-facebook-f"></i>
+        </a>
+        <button class="social-fab-toggle" onclick="document.getElementById('socialFab').classList.toggle('open')">
+            <i class="fa fa-comment-dots"></i>
+        </button>
+    </div>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

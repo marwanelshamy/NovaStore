@@ -97,5 +97,47 @@ namespace NovaStore.Services.Implementations
             _db.CartItems.RemoveRange(await query.ToListAsync());
             await _db.SaveChangesAsync();
         }
+
+        public async Task<CartViewModel> GetCartAsync(string? userId, string? sessionId, string? couponCode = null)
+        {
+            var query = _db.CartItems
+                .Include(c => c.ProductVariant)
+                    .ThenInclude(v => v.Product)
+                        .ThenInclude(p => p.Images)
+                .AsQueryable();
+
+            query = userId != null
+                ? query.Where(c => c.UserId == userId)
+                : query.Where(c => c.SessionId == sessionId);
+
+            var items = await query.ToListAsync();
+
+            var cart = new CartViewModel
+            {
+                Items = items.Select(c => new CartItemViewModel
+                {
+                    CartItemId = c.Id,
+                    ProductVariantId = c.ProductVariantId,
+                    ProductName = c.ProductVariant.Product.Name,
+                    VariantLabel = $"{c.ProductVariant.Color} / {c.ProductVariant.Size}",
+                    ImageFileName = c.ProductVariant.Product.Images.OrderBy(i => i.SortOrder).FirstOrDefault()?.FileName,
+                    UnitPrice = c.ProductVariant.Product.Price,
+                    Quantity = c.Quantity,
+                    AvailableStock = c.ProductVariant.StockQuantity
+                }).ToList()
+            };
+
+            if (!string.IsNullOrEmpty(couponCode))
+            {
+                var coupon = await _db.Coupons.FirstOrDefaultAsync(cp => cp.Code.ToUpper() == couponCode.ToUpper());
+                if (coupon != null && coupon.IsValid)
+                {
+                    cart.Discount = cart.Subtotal * (coupon.DiscountPercent / 100m);
+                    cart.CouponCode = couponCode;
+                }
+            }
+
+            return cart;
+        }
     }
 }

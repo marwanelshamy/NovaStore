@@ -1,14 +1,48 @@
-﻿using NovaStore.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using NovaStore.Data;
+using NovaStore.Models;
 using NovaStore.Services.Interfaces;
 
 namespace NovaStore.Services.Implementations
 {
     public class CouponService : ICouponService
     {
-        public Task<Coupon?> ValidateAsync(string code) => Task.FromResult<Coupon?>(null);
-        public Task<decimal> ApplyAsync(string code, decimal subtotal) => Task.FromResult(0m);
-        public Task<IEnumerable<Coupon>> GetAllAsync() => Task.FromResult(Enumerable.Empty<Coupon>());
-        public Task CreateAsync(Coupon coupon) => Task.CompletedTask;
-        public Task DisableAsync(int id) => Task.CompletedTask;
+        private readonly ApplicationDbContext _db;
+        public CouponService(ApplicationDbContext db) => _db = db;
+
+        public async Task<Coupon?> ValidateAsync(string code)
+        {
+            var coupon = await _db.Coupons
+                .FirstOrDefaultAsync(c => c.Code.ToUpper() == code.ToUpper());
+
+            return coupon != null && coupon.IsValid ? coupon : null;
+        }
+
+        public async Task<decimal> ApplyAsync(string code, decimal subtotal)
+        {
+            var coupon = await ValidateAsync(code);
+            if (coupon == null) return 0;
+
+            return subtotal * (coupon.DiscountPercent / 100m);
+        }
+
+        public async Task<IEnumerable<Coupon>> GetAllAsync() =>
+            await _db.Coupons.OrderByDescending(c => c.CreatedAt).ToListAsync();
+
+        public async Task CreateAsync(Coupon coupon)
+        {
+            _db.Coupons.Add(coupon);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task DisableAsync(int id)
+        {
+            var coupon = await _db.Coupons.FindAsync(id);
+            if (coupon != null)
+            {
+                coupon.IsActive = false;
+                await _db.SaveChangesAsync();
+            }
+        }
     }
 }

@@ -15,17 +15,19 @@ namespace NovaStore.Controllers
         private readonly IOrderService _orderService;
         private readonly IPaymentService _paymentService;
         private readonly UserManager<ApplicationUser> _userManager;
-
+        private readonly IEmailService _emailService;
         public CheckoutController(
-            ICartService cartService,
-            IOrderService orderService,
-            IPaymentService paymentService,
-            UserManager<ApplicationUser> userManager)
+     ICartService cartService,
+     IOrderService orderService,
+     IPaymentService paymentService,
+     UserManager<ApplicationUser> userManager,
+     IEmailService emailService)
         {
             _cartService = cartService;
             _orderService = orderService;
             _paymentService = paymentService;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
         private async Task<(string? userId, string? sessionId)> GetIdentity()
@@ -41,14 +43,14 @@ namespace NovaStore.Controllers
         public async Task<IActionResult> Index()
         {
             var (userId, sessionId) = await GetIdentity();
-            var cart = await _cartService.GetCartAsync(userId, sessionId);
+            var coupon = CartHelper.GetCoupon(HttpContext);
+            var cart = await _cartService.GetCartAsync(userId, sessionId, coupon);
 
             if (!cart.Items.Any())
                 return RedirectToAction("Index", "Cart");
 
             var model = new CheckoutViewModel { Cart = cart };
 
-            // Pre-fill email if logged in
             if (userId != null)
             {
                 var user = await _userManager.FindByIdAsync(userId);
@@ -104,5 +106,48 @@ namespace NovaStore.Controllers
 
             return View(model);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PlaceOrder(CheckoutViewModel model)
+        {
+            var (userId, sessionId) = await GetIdentity();
+            var coupon = CartHelper.GetCoupon(HttpContext);
+            var cart = await _cartService.GetCartAsync(userId, sessionId, coupon);
+            if (!cart.Items.Any())
+                return RedirectToAction("Index", "Cart");
+
+            if (!ModelState.IsValid)
+            {
+                model.Cart = cart;
+                return View("Index", model);
+            }
+
+            var order = await _orderService.CreateOrderAsync(model, userId, sessionId);
+
+            if (model.PaymentMethod == NovaStore.Models.Enums.PaymentMethod.COD)
+            {
+                await _emailService.SendOrderConfirmationAsync(
+                    order.ShippingEmail,
+                    order.ShippingName,
+                    order.Id,
+                    order.Total
+                );
+
+                return RedirectToAction("Confirmation",
+                    new { orderNumber = order.OrderNumber });
+            }
+            else
+            {
+                var redirectUrl = await _paymentService.InitiatePaymentAsync(
+                    order.Id,
+                    order.Total,
+                    model.Email);
+
+                return Redirect(redirectUrl);
+            }
+        }
+
+
     }
 }

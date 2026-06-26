@@ -1,0 +1,30 @@
+﻿@model NovaStore.ViewModels.Admin.AdminCategoryFormViewModel
+
+@{
+    ViewData["Title"] = "Edit Category";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-topbar">
+    <h1>Edit Category</h1>
+</div>
+
+<div class="admin-card" style="max-width:480px">
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        <label>Name</label>
+        <input asp-for="Name" placeholder="e.g. Hoodie" />
+        <span asp-validation-for="Name" style="color:#c0392b;font-size:12px"></span>
+
+        <label>Slug (URL-friendly)</label>
+        <input asp-for="Slug" placeholder="e.g. hoodie" />
+        <span asp-validation-for="Slug" style="color:#c0392b;font-size:12px"></span>
+
+        <label>Sort Order</label>
+        <input asp-for="SortOrder" type="number" />
+
+        <button type="submit" class="btn-admin" style="margin-top:8px">Save Changes</button>
+    </form>
+</div>

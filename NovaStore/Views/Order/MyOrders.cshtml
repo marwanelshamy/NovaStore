@@ -1,5 +1,48 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model NovaStore.ViewModels.Order.MyOrdersViewModel
+
 @{
+    ViewData["Title"] = "My Orders";
 }
+
+<div style="max-width:800px;margin:60px auto;padding:0 20px">
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:36px;margin-bottom:32px">My Orders</h1>
+
+    @if (!Model.Orders.Any())
+    {
+        <div style="text-align:center;padding:60px 0">
+            <p style="color:var(--gray-600);margin-bottom:24px">You haven't placed any orders yet.</p>
+            <a asp-controller="Shop" asp-action="Index" class="btn btn-dark">Start Shopping</a>
+        </div>
+    }
+    else
+    {
+        <div style="background:white;border-radius:8px;border:1px solid #eee;overflow:hidden">
+            @foreach (var o in Model.Orders)
+            {
+                var (bg, fg) = o.Status switch
+                {
+                    NovaStore.Models.Enums.OrderStatus.Pending => ("#f0f0f0", "#666"),
+                    NovaStore.Models.Enums.OrderStatus.Confirmed => ("#e6f4ea", "#1e7e34"),
+                    NovaStore.Models.Enums.OrderStatus.Packed => ("#e6f0fb", "#1a5fa8"),
+                    NovaStore.Models.Enums.OrderStatus.Shipped => ("#e6f0fb", "#1a5fa8"),
+                    NovaStore.Models.Enums.OrderStatus.Delivered => ("#e6f4ea", "#1e7e34"),
+                    NovaStore.Models.Enums.OrderStatus.Cancelled => ("#fbe9e9", "#c0392b"),
+                    _ => ("#f0f0f0", "#666")
+                };
+                <a asp-action="Track" asp-route-orderNumber="@o.OrderNumber"
+                   style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;
+                    border-top:1px solid #f0f0f0;text-decoration:none;color:inherit">
+                    <div>
+                        <p style="font-weight:600;margin-bottom:4px">@o.OrderNumber</p>
+                        <p style="font-size:13px;color:#999">@o.CreatedAt.ToString("MMMM d, yyyy") · @o.ItemCount items</p>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:16px">
+                        <span style="display:inline-block;padding:4px 12px;border-radius:4px;font-size:12px;font-weight:600;background:@bg;color:@fg">@o.Status</span>
+                        <strong>$@o.Total.ToString("0.00")</strong>
+                        <i class="fa fa-chevron-right" style="color:#ccc"></i>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>
