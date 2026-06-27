@@ -82,7 +82,7 @@ namespace NovaStore.Services.Implementations
                 ImageFileName = p.Images.OrderBy(i => i.SortOrder)
                                         .FirstOrDefault()?.FileName,
                 CategoryName = p.Category?.Name ?? "",
-                IsNew = p.CreatedAt > DateTime.UtcNow.AddDays(-30)
+                IsNew = p.CreatedAt > DateTime.UtcNow.AddDays(-7)
             };
         }
 
